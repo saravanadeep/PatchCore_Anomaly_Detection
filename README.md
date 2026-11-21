@@ -2,6 +2,57 @@
 
 A local bottle inspection app built with React, FastAPI and PyTorch. Upload a bottle photo to see a Normal or Defective prediction, an anomaly score, and a relative heatmap alongside the original image.
 
+
+## Demo
+
+### Defective bottle
+
+![Defective bottle with its original image and relative anomaly heatmap](docs/images/defective-bottle.png)
+
+The detector scored this bottle at **6.101**, above the **5.196** cutoff.
+
+### Normal bottle
+
+![Normal bottle with its original image and relative anomaly heatmap](docs/images/normal-bottle.png)
+
+The score fell below the cutoff, so the detector labeled this bottle **Normal**.
+Red shows the most unusual regions within each photo, so it can also appear on a normal bottle.
+
+
+
+## Project architecture
+
+The notebook prepares the detector once. The app then reuses the saved detector for each uploaded bottle photo.
+
+```mermaid
+flowchart TD
+    subgraph Notebook["Notebook · prepare the detector"]
+        A["8 normal training bottles"] --> B["ResNet18 patch features"]
+        B --> C["Select 128 representative patches"]
+        C --> D["Normal memory bank"]
+        E["40 separate normal bottles"] --> F["Set the decision cutoff"]
+        D --> F
+        D --> G["Save memory_bank.pt"]
+        F --> G
+    end
+
+    subgraph App["Local app · inspect a new bottle"]
+        H["Upload photo in React"] --> I["FastAPI /predict"]
+        I --> J["Extract ResNet18 patch features"]
+        J --> K["Find nearest normal patch"]
+        K --> L["Maximum distance → bottle score"]
+        K --> M["Patch distances → heatmap"]
+        L --> N["Compare score with cutoff"]
+        N --> O["React displays prediction, score and heatmap"]
+        M --> O
+    end
+
+    G -->|"Reference patches"| K
+    G -->|"Saved cutoff"| N
+```
+
+For evaluation, the notebook scores 83 separate test bottles. Image labels check the Normal or Defective decision, and ground-truth masks check where the detector highlights defects.
+
 ## How the detector works
 
 This is an educational PatchCore-inspired implementation. A frozen ImageNet-pretrained ResNet18 extracts two feature grids from a 224 × 224 RGB image. The detector aligns layers 2 and 3 and concatenates them into 384-dimensional descriptors at 28 × 28 locations.
@@ -41,7 +92,9 @@ python -m pip install -r requirements.txt
 
 ### Prepare the detector
 
-Download the bottle category from [MVTec AD](https://www.mvtec.com/company/research/datasets/mvtec-ad). Place the extracted train, test and ground_truth folders inside data/mvtec_anomaly_detection/bottle/. Follow the dataset provider's license terms.
+1. Open the [official MVTec AD dataset page](https://www.mvtec.com/company/research/datasets/mvtec-ad).
+2. Go to the dataset downloads and select **Bottle (148 MB)**.
+3. Extract the `bottle` folder into `data/mvtec_anomaly_detection/`. Check that `data/mvtec_anomaly_detection/bottle/train/good/` contains `.png` images.
 
 Open the project notebook in Jupyter and run the cells in order. The export cell writes models/memory_bank.pt. The revision notebook supports running from the repository or its notebooks folder. If using the original notebook with a hard-coded project path, set project_root and the initial image folder to your local checkout. The first ResNet18 run downloads pretrained weights. The saved checkpoint and raw dataset are excluded from version control.
 
@@ -79,18 +132,3 @@ Open the local URL printed by Vite. Select a test image and click **Inspect bott
 
 The reported results cover one category and one sampling seed. Repeat the experiment with different normal-image selections, review the missed contamination images against their masks, and reserve separate validation data for any further threshold tuning.
 
-
-## Demo
-
-### Defective bottle
-
-![Defective bottle with its original image and relative anomaly heatmap](docs/images/defective-bottle.png)
-
-The detector scored this bottle at **6.101**, above the **5.196** cutoff.
-
-### Normal bottle
-
-![Normal bottle with its original image and relative anomaly heatmap](docs/images/normal-bottle.png)
-
-The score fell below the cutoff, so the detector labeled this bottle **Normal**.
-Red shows the most unusual regions within each photo, so it can also appear on a normal bottle.
