@@ -78,3 +78,19 @@ Open the local URL printed by Vite. Select a test image and click **Inspect bott
 ## Limitations and future experiments
 
 The reported results cover one category and one sampling seed. Repeat the experiment with different normal-image selections, review the missed contamination images against their masks, and reserve separate validation data for any further threshold tuning.
+
+
+## Demo
+
+### Defective bottle
+
+![Defective bottle with its original image and relative anomaly heatmap](docs/images/defective-bottle.png)
+
+The detector scored this bottle at **6.101**, above the **5.196** cutoff.
+
+### Normal bottle
+
+![Normal bottle with its original image and relative anomaly heatmap](docs/images/normal-bottle.png)
+
+The score fell below the cutoff, so the detector labeled this bottle **Normal**.
+Red shows the most unusual regions within each photo, so it can also appear on a normal bottle.
