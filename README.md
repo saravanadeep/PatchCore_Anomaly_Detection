@@ -96,8 +96,6 @@ python -m pip install -r requirements.txt
 2. Go to the dataset downloads and select **Bottle (148 MB)**.
 3. Extract the `bottle` folder into `data/mvtec_anomaly_detection/`. Check that `data/mvtec_anomaly_detection/bottle/train/good/` contains `.png` images.
 
-Open the project notebook in Jupyter and run the cells in order. The export cell writes models/memory_bank.pt. The revision notebook supports running from the repository or its notebooks folder. If using the original notebook with a hard-coded project path, set project_root and the initial image folder to your local checkout. The first ResNet18 run downloads pretrained weights. The saved checkpoint and raw dataset are excluded from version control.
-
 ### Start the API
 
 ~~~bash
