@@ -1,0 +1,14 @@
+.DS_Store
+.ipynb_checkpoints/
+__pycache__/
+*.py[cod]
+.venv/
+.env
+node_modules/
+dist/
+data/
+models/*.pt
+models/*.tmp
+outputs/
+browser-export/
+*.zip
